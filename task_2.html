@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Animation Ball</title>
+    <style>
+        /* Стиль границы */
+        #canvas {
+            margin-top: 10px;
+            margin-left: 13px;
+            margin-right: 13px;
+            margin-bottom: 10px;
+            border: 3px solid black;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main" style="background-color: bisque; border-radius: 10px;">
+        <canvas id="canvas" width="1490" height="600"></canvas>
+    </div>
+
+    <div style="padding: 10px;">
+        <button onclick="accelerateBall();">Ускорить шарик</button>
+        <button onclick="decelerateBall();">Замедлить шарик</button>
+    </div>
+        
+    <div style="margin-left: 50px;">
+        <button onclick="changeBallColor();">Изменить цвет шарика</button>
+    </div>
+    
+
+    <script>
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+        // Расположение на координате
+        var x = canvas.width / 2; // начальные координаты мяча
+        var y = canvas.height / 2;
+        var radius = 40; // радиус мяча
+        var dx = 2; // изменение координат по оси x
+        var dy = -2; // изменение координат по оси y
+        var ballColor = "#dd4800"; // цвет мяча
+
+        // Коэффициенты масштабирования
+        var kx = 1.05;
+
+        // Флаг для отслеживания состояния мяча
+        var isBallIncreasing = true;
+
+		// Начальный множитель скорости
+		var speedMultiplier = 1; 
+
+        // Функция рисует мяч на холсте
+        function drawBall() {
+            context.clearRect(0, 0, canvas.width, canvas.height); // Стирание пути
+            context.beginPath(); 
+            context.arc(x, y, radius, 0, Math.PI * 2); // Создание мяча
+            context.fillStyle = ballColor;
+            context.fill(); // Заливка фигуры
+            context.closePath();
+        }
+
+        // Функция перемещения
+        function updateBallPosition() {
+            x += dx * speedMultiplier; // Умножаем на множитель скорости
+            y += dy * speedMultiplier;
+            
+            // Если мяч достигает границы по оси X (горизонтально), 
+            // то направление движения меняется на противоположное, умножая dx на -1
+            // Это позволяет мячу отскакивать от стенок и продолжать движение в противоположном направлении.
+            if (x + dx > canvas.width - radius || x + dx < radius) {
+                dx = -dx;
+                changeBallColor(); // Изменение цвета мяча при ударе о границу
+                updateBallSize(); // Изменение размера мяча при ударе о границу
+            }
+            // если мяч достигает границы по оси Y (вертикально), 
+            // то направление движения меняется на противоположное, умножая dy на -1.
+            if (y + dy > canvas.height - radius || y + dy < radius) {
+                dy = -dy;
+                changeBallColor(); // Изменение цвета мяча при ударе о границу
+                updateBallSize(); // Изменение размера мяча при ударе о границу
+            }
+        }
+
+        // Функция изменения цвета мяча
+        function changeBallColor() {
+            // Генерация случайного цвета в формате RGB
+            var r = Math.floor(Math.random() * 256);
+            var g = Math.floor(Math.random() * 256);
+            var b = Math.floor(Math.random() * 256);
+            
+            // Присвоение нового цвета мячу
+            ballColor = "rgb(" + r + ", " + g + ", " + b + ")";
+        }
+
+        // Функция изменения размера мяча (Масштабирование)
+        function updateBallSize() {
+            // Изменение размера мяча
+            if (isBallIncreasing) {
+                radius = kx * radius;
+            } else {
+                radius = 1 / kx * radius;
+            }
+
+            // Проверка размера мяча после увеличения
+            if (radius >= 100) {
+                isBallIncreasing = false; // Уменьшение коэффициента
+            } else if (radius <= 40) {
+                isBallIncreasing = true; // Восстановление увеличения
+            }
+        }
+
+		// Функция скорости перемещения шарика
+		function accelerateBall() {
+            speedMultiplier *= 1.5; // Увеличиваем скорость
+        }
+
+        function decelerateBall() {
+            speedMultiplier /= 1.5; // Уменьшаем скорость
+        }
+
+       // Функция анимации
+        function animate() {
+            drawBall();
+            updateBallPosition();
+            requestAnimationFrame(animate); // метод для создания плавной анимации
+        }
+
+        // Вызов функции анимации
+        animate();
+    </script>
+</body>
+</html>
