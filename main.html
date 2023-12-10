@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Animation</title>
+        <style>
+            #canvas, body{
+                padding: 0;
+                margin: 0;
+                overflow: hidden;
+                background-color: #FF7400;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="800" height="400"></canvas>
+
+        <script>
+            // Объявление переменных для ширины, высоты и счетчика шагов
+            var width, height;
+            var step = 0;
+
+            // Создание холста и контекста для рисования
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            // Цвет фона холста (белый)
+            var bg = [255, 255, 255];
+
+            // Объект для хранения координат мыши
+            function Mouse() {
+                this.x = window.innerWidth / 2;
+                this.y = window.innerHeight / 2;
+            }
+
+            // Инициализация объекта мыши
+            var mouse = new Mouse();
+
+            // Обработчик события движения мыши для обновления координат мыши
+            document.onmousemove = function (e) {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            };
+
+            // Добавление холста к телу документа
+            document.getElementsByTagName('body')[0].appendChild(canvas);
+
+            // Настройка стилей холста
+            canvas.style = "position:fixed; top:0; left:0; pointer-events: none;";
+
+            // Обработчик события изменения размеров окна браузера для перенастройки холста
+            window.addEventListener('resize', setup);
+            setup();
+
+            // Функция настройки размеров холста
+            function setup() {
+                canvas.width = width = window.innerWidth;
+                canvas.height = height = window.innerHeight;
+            }
+
+            // Запуск анимации
+            window.requestAnimationFrame(animate);
+
+            // Функция анимации
+            function animate() {
+                // Очистка холста
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Рисование
+                draw();
+
+                // Увеличение счетчика шагов
+                step++;
+
+                // Запрос следующего кадра анимации
+                window.requestAnimationFrame(function () {
+                    animate();
+                });
+            }
+
+            // Конструктор объекта "Цветок"
+            function Flwr() {
+                this.follow = null;
+                this.child = null;
+                this.x = mouse.x;
+                this.y = mouse.y;
+                this.dx = 0;
+                this.dy = 0;
+                this.a = 0.35;
+                this.b = 0.54;
+                this.n = 0;
+            }
+
+            var flwr, flwrPrev, train = [], i, n = 50;
+
+            // Инициализация массива объектов "Цветок"
+            for (i = 0; i < n; i++) {
+                flwr = new Flwr();
+                flwr.n = i;
+
+                // Настройка связей между цветками
+                if (flwrPrev) {
+                    flwr.b = flwrPrev.b + (0.1 / n);
+                    flwr.follow = flwrPrev;
+                    flwrPrev.child = flwr;
+                } else {
+                    flwr.follow = mouse;
+                }
+
+                flwrPrev = flwr;
+                train.push(flwr);
+            }
+
+            // Функция рисования
+            function draw() {
+                for (i in train) {
+                    // Обновление позиции цветка
+                    flwr = train[i];
+                    var dx = flwr.follow.x - flwr.x;
+                    var dy = flwr.follow.y - flwr.y;
+
+                    flwr.dx = flwr.dx * flwr.a + dx * (1 - flwr.a);
+                    flwr.dy = flwr.dy * flwr.a + dy * (1 - flwr.a);
+
+                    flwr.x = flwr.dx * flwr.b + flwr.x;
+                    flwr.y = flwr.dy * flwr.b + flwr.y;
+
+                    // Рисование линии между цветками, исключая последний (ближайший к мыше)
+                    if (flwr.follow !== mouse) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#009999';
+                        ctx.lineCap = 'round';
+                        ctx.lineWidth = (n - flwr.n) / n * 8 + 2;
+                        ctx.moveTo(flwr.x, flwr.y);
+                        ctx.lineTo(flwr.follow.x, flwr.follow.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Функция рисования круга
+            function drawCircle(context, x, y, r) {
+                context.arc(x, y, r, 0, 2 * Math.PI);
+            }
+
+            // Функция заполнения холста цветом
+            function fillCanvas(context, color, alpha) {
+                context.rect(0, 0, this.width, this.height);
+                context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+                context.fill();
+            }
+
+
+        </script>
+    </body>
+</html>
