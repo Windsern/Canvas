@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Анимация городской инфраструктуры</title>
+    <style>
+        /* Стиль границы */
+        #canvas {
+            border: 1px solid black;
+        }
+        body {
+            background-color: #87CEFA; /* Светло-голубой цвет фона */
+            margin: 0; /* Удаление отступы между содержимым body и краями страницы */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="Canvas" width="1400" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('Canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Анимация движения машин и автобуса
+        let carX = 0; // начальная позиция первой машины
+        let secondCarX = -120; // начальная позиция второй машины
+        let busX = canvas.width; // начальная позиция автобуса
+        let thirdCarX = canvas.width + 100; // начальная позиция машины, идущей вслед за автобусом
+        let secondbusX = -60; // начальная позиция автобуса
+
+        // Параметры для движения солнца
+        let sunCenterX = canvas.width / 2 + 500; // Начальная позиция по оси X для центра солнца
+        let sunCenterY = canvas.height - 80; // Начальная позиция по оси Y для центра солнца
+        let sunRadius = 60; // Радиус солнца
+        let sunAngle = 330; // Начальный угол для позиции солнца на дуге, помещение солнца в левой части
+
+        // Центры масштабирования облаков
+        let cloudCenters = [
+            { x: 200, y: 50 },
+            { x: 300, y: 120 },
+            { x: 500, y: 120 },
+            { x: 700, y: 70 },
+            { x: 900, y: 110 },
+            { x: 1200, y: 70 },
+        ];
+
+        // Масштабы облаков
+        let cloudScales = [
+            { kx: 1, ky: 1 },
+            { kx: 1, ky: 1 },
+            { kx: 1, ky: 1 },
+            { kx: 1, ky: 1 },
+            { kx: 1, ky: 1 },
+            { kx: 1, ky: 1 },
+        ];
+
+        //Функция выполнения анимации
+        function draw() {
+            // Очистка canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Движение солнца по дуге
+            sunAngle += 0.001; // Скорость движения солнца
+            sunCenterX = canvas.width / 2 + 500 * Math.cos(sunAngle); // Рассчитывает новую абсциссу (X) центра солнца в зависимости от угла. 
+            sunCenterY = canvas.height - 80 + 500 * Math.sin(sunAngle); // Рассчитывает новую ординату (Y) центра солнца с использованием синуса.
+
+            // Солнце
+            ctx.fillStyle = '#FFD700'; // желтый цвет солнца
+            ctx.beginPath();
+            ctx.arc(sunCenterX, sunCenterY, sunRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Облака
+            for (let i = 0; i < cloudCenters.length; i++) {
+                ctx.fillStyle = '#FFFFFF'; // белый цвет облака
+
+                // Функция для медленного масштабирования с использованием синуса
+                function slowScale() {
+                    return 1 + 0.2 * Math.sin(Date.now() * 0.001);
+                }
+                function slowScale1() {
+                    return 1 + 0.1 * Math.cos(Date.now() * 0.002);
+                }
+                function slowScale2() {
+                    return 1 + 0.2 * Math.sin(Date.now() * 0.002);
+                }
+
+                // Медленное масштабирование каждой окружности облаков
+                scale1 = slowScale();
+                scale2 = slowScale1();
+                scale3 = slowScale2();
+
+                // Масштабирование облаков с использованием формулы масштабирования
+                let scaledCenters = {
+                    x: cloudCenters[i].x + cloudScales[i].kx * (cloudCenters[i].x - cloudCenters[i].x),
+                    y: cloudCenters[i].y + cloudScales[i].ky * (cloudCenters[i].y - cloudCenters[i].y),
+                };
+
+                ctx.beginPath();
+                ctx.arc(scaledCenters.x, scaledCenters.y, 30 * scale1, 0, Math.PI * 2); // Создание первой окружности
+                ctx.arc(scaledCenters.x + 40 * scale2, scaledCenters.y, 30 * scale2, 0, Math.PI * 2); // Создание второй окружности
+                // ctx.arc(scaledCenters.x + 80 * scale3, scaledCenters.y, 30 * scale3, 0, Math.PI * 2); // Создание третьей окружности
+                ctx.fill();
+            }
+
+            // Дорога
+            ctx.fillStyle = '#808080'; // Серый цвет дороги
+            ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+
+            // Полоса дороги
+            ctx.fillStyle = '#F0F8FF'; // Белый цвет полосы дороги
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 5);
+
+            // Деревья
+            ctx.fillStyle = '#8B4513'; // Коричневый ствол дерева
+            ctx.fillRect(50, canvas.height - 130, 20, 50);
+            ctx.fillStyle = '#008000'; // Зеленный цвет листьев
+            ctx.beginPath();
+            ctx.arc(60, canvas.height - 160, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8B4513'; // Коричневый ствол дерева
+            ctx.fillRect(200, canvas.height - 130, 20, 50);
+            ctx.fillStyle = '#008000'; // Зеленный цвет листьев
+            ctx.beginPath();
+            ctx.arc(210, canvas.height - 160, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8B4513'; // Коричневый ствол дерева
+            ctx.fillRect(500, canvas.height - 130, 20, 50);
+            ctx.fillStyle = '#008000'; // Зеленный цвет листьев
+            ctx.beginPath();
+            ctx.arc(510, canvas.height - 160, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8B4513'; // Коричневый ствол дерева
+            ctx.fillRect(730, canvas.height - 130, 20, 50);
+            ctx.fillStyle = '#008000'; // Зеленный цвет листьев
+            ctx.beginPath();
+            ctx.arc(740, canvas.height - 160, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8B4513'; // Коричневый ствол дерева
+            ctx.fillRect(930, canvas.height - 130, 20, 50);
+            ctx.fillStyle = '#008000'; // Зеленный цвет листьев
+            ctx.beginPath();
+            ctx.arc(940, canvas.height - 160, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8B4513'; // Коричневый ствол дерева
+            ctx.fillRect(1130, canvas.height - 130, 20, 50);
+            ctx.fillStyle = '#008000'; // Зеленный цвет листьев
+            ctx.beginPath();
+            ctx.arc(1140, canvas.height - 160, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8B4513'; // Коричневый ствол дерева
+            ctx.fillRect(1300, canvas.height - 130, 20, 50);
+            ctx.fillStyle = '#008000'; // Зеленный цвет листьев
+            ctx.beginPath();
+            ctx.arc(1310, canvas.height - 160, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Дома
+            ctx.fillStyle = '#8B4513'; // Коричневый цвет дома
+            ctx.fillRect(320, canvas.height - 230, 80, 150);
+            ctx.fillStyle = '#FFD700'; // Желтый цвет окна
+            ctx.fillRect(330, canvas.height - 210, 20, 20);
+            ctx.fillRect(370, canvas.height - 210, 20, 20);
+            ctx.fillRect(330, canvas.height - 180, 20, 20);
+            ctx.fillRect(370, canvas.height - 180, 20, 20);
+            ctx.fillRect(330, canvas.height - 150, 20, 20);
+            ctx.fillRect(370, canvas.height - 150, 20, 20);
+            ctx.fillRect(330, canvas.height - 120, 20, 20);
+            ctx.fillRect(370, canvas.height - 120, 20, 20);
+
+            ctx.fillStyle = '#8B4513'; // Коричневый цвет дома
+            ctx.fillRect(600, canvas.height - 230, 80, 150);
+            ctx.fillStyle = '#FFD700'; // Желтый цвет окна
+            ctx.fillRect(610, canvas.height - 210, 20, 20);
+            ctx.fillRect(650, canvas.height - 210, 20, 20);
+            ctx.fillRect(610, canvas.height - 180, 20, 20);
+            ctx.fillRect(650, canvas.height - 180, 20, 20);
+            ctx.fillRect(610, canvas.height - 150, 20, 20);
+            ctx.fillRect(650, canvas.height - 150, 20, 20);
+            ctx.fillRect(610, canvas.height - 120, 20, 20);
+            ctx.fillRect(650, canvas.height - 120, 20, 20);
+
+            ctx.fillStyle = '#8B4513'; // Коричневый цвет дома
+            ctx.fillRect(800, canvas.height - 230, 80, 150);
+            ctx.fillStyle = '#FFD700'; // Желтый цвет окна
+            ctx.fillRect(810, canvas.height - 210, 20, 20);
+            ctx.fillRect(850, canvas.height - 210, 20, 20);
+            ctx.fillRect(810, canvas.height - 180, 20, 20);
+            ctx.fillRect(850, canvas.height - 180, 20, 20);
+            ctx.fillRect(810, canvas.height - 150, 20, 20);
+            ctx.fillRect(850, canvas.height - 150, 20, 20);
+            ctx.fillRect(810, canvas.height - 120, 20, 20);
+            ctx.fillRect(850, canvas.height - 120, 20, 20);
+
+            ctx.fillStyle = '#8B4513'; // Коричневый цвет дома
+            ctx.fillRect(1000, canvas.height - 230, 80, 150);
+            ctx.fillStyle = '#FFD700'; // Желтый цвет окна
+            ctx.fillRect(1010, canvas.height - 210, 20, 20);
+            ctx.fillRect(1050, canvas.height - 210, 20, 20);
+            ctx.fillRect(1010, canvas.height - 180, 20, 20);
+            ctx.fillRect(1050, canvas.height - 180, 20, 20);
+            ctx.fillRect(1010, canvas.height - 150, 20, 20);
+            ctx.fillRect(1050, canvas.height - 150, 20, 20);
+            ctx.fillRect(1010, canvas.height - 120, 20, 20);
+            ctx.fillRect(1050, canvas.height - 120, 20, 20);
+
+            // Автобус
+            ctx.fillStyle = '#FFFF00'; // Желтый цвет корпуса
+            ctx.fillRect(busX, canvas.height - 120, 130, 50);
+            ctx.fillStyle = '#0000FF'; // Синий цвет окна
+            ctx.fillRect(busX + 10, canvas.height - 110, 110, 15);
+
+            // Третья машина
+            ctx.fillStyle = '#FF7F50'; // Оранжевый цвет корпуса
+            ctx.fillRect(thirdCarX, canvas.height - 75, 80, 20);
+            ctx.fillStyle = '#0000FF'; // Синий цвет окна
+            ctx.fillRect(thirdCarX + 30, canvas.height - 85, 40, 10);
+
+            // Первая машина
+            ctx.fillStyle = '#FF0000'; // Красный цвет корпуса
+            ctx.fillRect(carX, canvas.height - 60, 80, 30);
+            ctx.fillStyle = '#0000FF'; // Синий цвет окна
+            ctx.fillRect(carX + 10, canvas.height - 70, 40, 10);
+
+            // Вторая машина
+            ctx.fillStyle = '#00FF00'; // Зеленый цвет корпуса
+            ctx.fillRect(secondCarX, canvas.height - 40, 80, 20);
+            ctx.fillStyle = '#0000FF'; // Синий цвет окна
+            ctx.fillRect(secondCarX + 10, canvas.height - 50, 40, 10);
+
+            // Второй автобус
+            ctx.fillStyle = '#FFFF00'; // Желтый цвет корпуса
+            ctx.fillRect(secondbusX, canvas.height - 60, 130, 50);
+            ctx.fillStyle = '#0000FF'; // Синий цвет окна
+            ctx.fillRect(secondbusX + 10, canvas.height - 50, 110, 15);
+
+            // Граница канвы
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+            // Обновление позицию согласно формуле перемещения X = x + dx:
+            carX += 2; // первой машины
+            secondCarX += 4; // второй машины
+            busX -= 2; // автобуса
+            thirdCarX -= 4; //третьей машины
+            secondbusX += 1; // второго автобуса
+
+            // Проверка, чтобы машины не выходили за пределы canvas
+            if (carX > canvas.width) {
+                carX = -60;
+            }
+            if (secondCarX > canvas.width) {
+                secondCarX = -80;
+            }
+            if (thirdCarX < -80) {
+                thirdCarX = canvas.width + 100;
+            }
+            // Проверка, чтобы автобус не выходил за пределы canvas
+            if (busX < -110) {
+                busX = canvas.width;
+            }
+            if (secondbusX > canvas.width) {
+                secondbusX = -60;
+            }
+
+            // Запуск следующий кадр анимации
+            requestAnimationFrame(draw);
+        }
+
+        // Вызов функции запуска анимацию
+        draw();
+    </script>
+
+</body>
+</html>
